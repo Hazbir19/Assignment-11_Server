@@ -4,7 +4,7 @@ const app = express();
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
-const port = process.env.Port || 5000;
+const port = process.env.Port || 5004;
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const { use } = require("express/lib/application");
 const uri = `mongodb+srv://${process.env.DB_Store}:${process.env.DB_Pass}@cluster0.ymamf.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -65,7 +65,8 @@ async function run() {
       .collection("tuitorial");
     // Connect the client to the server
     app.post("/users", async (req, res) => {
-      const tuitorUser = req.body; //data from frontend
+      const tuitorUser = req.body; 
+      console.log(tuitorUser);//data from frontend
       console.log("new user", tuitorUser);
       try {
         const result = await MemberDataBase.insertOne(tuitorUser);
@@ -76,6 +77,13 @@ async function run() {
         res.status(500).send({ message: "Database error" });
       }
     });
+    // Get  users from the database
+    app.get('/users/:email', async (req, res) => {
+  const email = req.params.email;
+  console.log(email)
+  const user = await MemberDataBase.findOne({ email });
+  res.send(user);
+});
     // Addtuitotial to server to database (Create)
     app.post("/tuitorial", async (req, res) => {
       const tuitorial = req.body; //data from frontend
@@ -94,6 +102,12 @@ async function run() {
       const tuitorial = await TuitorialDataBase.find({}).toArray();
       res.send(tuitorial);
     });
+    // Add-tuitotial to server to database (Get)
+app.get("/tuitorials", async (req, res) => {
+  const tuitorial = await TuitorialDataBase.find({}).limit(4).toArray();
+  res.send(tuitorial);
+});
+
     app.get("/tuitorial/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
